@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mizan Faroidh</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fbfaf7;--fg:#1d2420;--mut:#5d675f;--card:#fff;--bd:#cfd6cc;--ac:#1f5c46;--acbg:#e6f0ea;--warn:#fff4d6;--warnfg:#6b4b00;--err:#fde8e6;--errfg:#8a1f17;--hd:#eef2ec;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#151a17;--fg:#e8ece8;--mut:#9aa69d;--card:#1d2420;--bd:#38443c;--ac:#6fc29f;--acbg:#1f3329;--warn:#3a3016;--warnfg:#f0d58a;--err:#3d1e1b;--errfg:#f3a79f;--hd:#232c27}}
+:root[data-theme="dark"]{--bg:#151a17;--fg:#e8ece8;--mut:#9aa69d;--card:#1d2420;--bd:#38443c;--ac:#6fc29f;--acbg:#1f3329;--warn:#3a3016;--warnfg:#f0d58a;--err:#3d1e1b;--errfg:#f3a79f;--hd:#232c27}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Georgia,"Times New Roman",serif}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:24px;margin:4px 0 0;color:var(--ac)}h1 small{font-family:Amiri,serif;font-size:22px;margin-left:8px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:13px}
+h2{font-size:16px;margin:0 0 10px;color:var(--ac);border-bottom:1px solid var(--bd);padding-bottom:4px}
+section{background:var(--card);border:1px solid var(--bd);border-radius:6px;padding:14px;margin-bottom:14px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end}
+label{font-size:12px;color:var(--mut);display:block}
+select,input,button{font:inherit;padding:6px 8px;border:1px solid var(--bd);border-radius:4px;background:var(--card);color:var(--fg)}
+button{cursor:pointer;background:var(--ac);color:var(--bg);border-color:var(--ac)}button.g{background:transparent;color:var(--ac)}
+button.x{background:transparent;color:var(--errfg);border-color:var(--bd);padding:4px 8px}
+.list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chip{display:flex;gap:6px;align-items:center;border:1px solid var(--bd);background:var(--acbg);padding:4px 6px;border-radius:4px}
+.chip input{width:54px;padding:3px 4px}.ar{font-family:Amiri,serif;font-size:18px}
+.msg{padding:8px 10px;border-radius:4px;margin-bottom:8px;font-size:14px}.warn{background:var(--warn);color:var(--warnfg)}.err{background:var(--err);color:var(--errfg)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:620px}
+th,td{border:1px solid var(--bd);padding:6px 8px;text-align:center;font-size:14px}th{background:var(--hd)}td.l{text-align:left}
+tr.mj td{color:var(--mut)}tfoot td{font-weight:bold;background:var(--hd)}
+.asl{display:inline-block;border:1px solid var(--bd);padding:4px 10px;margin-bottom:8px;background:var(--acbg);border-radius:4px}
+ol{padding-left:20px;margin:0}li{margin-bottom:4px}.mut{color:var(--mut);font-size:13px}
+@media print{.noprint{display:none}body{background:#fff;color:#000}section{border:0;padding:0}:root{--card:#fff;--fg:#000;--bd:#888;--hd:#eee;--acbg:#fff;--ac:#000;--mut:#444}}
+</style>
+</head>
+<body>
+<main>
+<h1>Mizan Faroidh<small class="ar">ميزان الفرائض</small></h1>
+<p class="sub">Lembar kerja faraidh digital: input ahli waris → hijab → furudh dan ashabah → ashlul mas’alah → saham → tashih → nasib.</p>
+
+<section class="noprint">
+<h2>1. Input Ahli Waris</h2>
+<div class="row">
+<div><label>Jenis ahli waris</label><select id="sel"></select></div>
+<div><label>Jumlah</label><input id="num" type="number" min="1" value="1" style="width:70px"></div>
+<button id="add">Tambah</button>
+<div><label>Harta (opsional, Rp)</label><input id="harta" type="number" min="0" placeholder="24000000" style="width:150px"></div>
+</div>
+<div class="list" id="list"></div>
+<div class="row" style="margin-top:12px">
+<div><label>Contoh kasus</label><select id="ex"><option value="">Pilih contoh…</option></select></div>
+<button class="g" id="reset">Reset</button>
+<button class="g" onclick="window.print()">Cetak</button>
+</div>
+</section>
+
+<div id="out"></div>
+<p class="mut">Aturan hijab dan bagian disusun eksplisit di kode (fungsi calc) mengikuti kaidah mazhab Syafi’i standar dan diagram hijab. Kasus yang belum didukung ditandai dan tidak dihitung. Mohon cocokkan dengan kitab pegangan sebelum dipakai mengajar.</p>
+</main>
+<script>
+const H=[["husband","زوج","Suami",1],["wife","زوجة","Istri",4],["son","ابن","Anak laki-laki",30],["dau","بنت","Anak perempuan",30],["gson","ابن الابن","Cucu laki-laki (dari anak lk)",30],["gdau","بنت الابن","Cucu perempuan (dari anak lk)",30],["father","أب","Ayah",1],["mother","أم","Ibu",1],["gfather","جد","Kakek (ayah dari ayah)",1],["gmm","جدة","Nenek (ibu dari ibu)",1],["gmf","جدة","Nenek (ibu dari ayah)",1],["fbro","أخ شقيق","Saudara lk kandung",30],["fsis","أخت شقيقة","Saudari kandung",30],["pbro","أخ لأب","Saudara lk seayah",30],["psis","أخت لأب","Saudari seayah",30],["msib","أخ/أخت لأم","Saudara/i seibu",30],["fnep","ابن أخ شقيق","Keponakan lk (anak saudara kandung)",30],["pnep","ابن أخ لأب","Keponakan lk (anak saudara seayah)",30],["func","عم شقيق","Paman kandung",30],["punc","عم لأب","Paman seayah",30],["fcou","ابن عم شقيق","Sepupu lk (anak paman kandung)",30],["pcou","ابن عم لأب","Sepupu lk (anak paman seayah)",30]];
+const EX={"Istri, 2 anak pr, ayah, ibu (‘awl)":{wife:1,dau:2,father:1,mother:1},"Istri, ibu, 3 anak pr, 3 saudari kandung (tashih)":{wife:1,mother:1,dau:3,fsis:3},"Istri, nenek, 2 saudara seibu (radd)":{wife:1,gmm:1,msib:2},"Suami, ibu, ayah (Umariyatain)":{husband:1,mother:1,father:1},"2 anak lk, 3 anak pr (bil ghair)":{son:2,dau:3}};
+const gcd=(a,b)=>b?gcd(b,a%b):Math.abs(a),lcm=(a,b)=>a/gcd(a,b)*b;
+const F=(n,d=1)=>{const g=gcd(n,d)||1;return[n/g,d/g]},add=(a,b)=>F(a[0]*b[1]+b[0]*a[1],a[1]*b[1]),sub=(a,b)=>add(a,[-b[0],b[1]]),mul=(a,b)=>F(a[0]*b[0],a[1]*b[1]);
+const fs=f=>f[1]==1?String(f[0]):f[0]+"/"+f[1];
+const lab=k=>H.find(h=>h[0]==k)[2];
+const MK=new Set(["son","gson","fbro","pbro"]),FM=new Set(["dau","gdau","fsis","psis"]);
+
+function calc(c){
+ const g=k=>c[k]||0,M={},R={},G=[],log=[],warn=[];
+ const act=k=>g(k)>0&&!M[k],mh=(k,w)=>{if(g(k)&&!M[k])M[k]=w};
+ if(g("husband")&&g("wife"))return{err:"Suami dan istri tidak dapat sekaligus menjadi ahli waris dari satu pewaris."};
+ if(!Object.values(c).some(v=>v>0))return{err:"Belum ada ahli waris. Tambahkan ahli waris di atas."};
+ const mdesc=g("son")+g("gson")>0,fem=g("dau")+g("gdau")>0,desc=mdesc||fem;
+ /* ANALISIS HIJAB */
+ if(g("son"))mh("gson","Hijab hirman oleh Anak laki-laki");
+ if(g("son"))mh("gdau","Hijab hirman oleh Anak laki-laki");
+ else if(g("dau")>=2&&!g("gson"))mh("gdau","Hijab hirman: 2/3 sudah dipenuhi dua anak perempuan atau lebih, tidak ada cucu laki-laki yang menariknya");
+ if(g("father"))mh("gfather","Hijab hirman oleh Ayah");
+ if(g("mother")){mh("gmm","Hijab hirman oleh Ibu");mh("gmf","Hijab hirman oleh Ibu")}
+ if(g("father"))mh("gmf","Hijab hirman oleh Ayah");
+ const sb=mdesc?"anak/cucu laki-laki":g("father")?"Ayah":"";
+ if(sb)["fbro","fsis","pbro","psis"].forEach(k=>mh(k,"Hijab hirman oleh "+sb));
+ if(desc||g("father")||g("gfather"))mh("msib","Hijab hirman oleh "+(desc?"furu’ waris (anak/cucu)":g("father")?"Ayah":"Kakek"));
+ if(act("fbro"))mh("pbro","Hijab hirman oleh Saudara lk kandung");
+ if(act("fsis")&&fem)mh("pbro","Hijab hirman oleh Saudari kandung (ashabah ma’al ghair)");
+ if(act("fbro"))mh("psis","Hijab hirman oleh Saudara lk kandung");
+ if(act("fsis")&&fem)mh("psis","Hijab hirman oleh Saudari kandung (ashabah ma’al ghair)");
+ if(g("fsis")>=2&&act("fsis")&&!act("pbro")&&!fem)mh("psis","Hijab hirman: 2/3 sudah dipenuhi dua saudari kandung atau lebih, tidak ada saudara lk seayah");
+ if(act("gfather")&&["fbro","fsis","pbro","psis"].some(act))return{err:"Kakek bersama saudara kandung/seayah (muqasamah, 1/3, 1/6) belum didukung dan belum terverifikasi. Hasil tidak ditampilkan agar tidak keliru."};
+ const nsib=["fbro","fsis","pbro","psis","msib"].reduce((s,k)=>s+(act(k)?g(k):0),0);
+ log.push("Hijab: "+(Object.keys(M).length?Object.keys(M).map(k=>lab(k)+" mahjub").join("; "):"tidak ada ahli waris yang terhijab")+".");
+ /* FURUDH */
+ const mk=(ks,fr,why)=>{const x={ks,fr,why,f0:fr?fs(fr):"",ash:false,w:{}};const mixed=ks.some(k=>MK.has(k))&&ks.some(k=>FM.has(k));ks.forEach(k=>{x.w[k]=mixed&&MK.has(k)?2:1;R[k]=x});G.push(x);return x};
+ const sp=g("husband")?"husband":g("wife")?"wife":null;
+ if(sp){const x=mk([sp],sp=="husband"?(desc?F(1,4):F(1,2)):(desc?F(1,8):F(1,4)),"");x.sp=1;
+  x.why=desc?fs(x.fr)+" (nuqshan karena ada furu’ waris)":fs(x.fr)+" karena tidak ada furu’ waris"}
+ if(act("dau")&&!act("son"))mk(["dau"],g("dau")==1?F(1,2):F(2,3),g("dau")==1?"1/2 karena sendirian, tanpa anak laki-laki":"2/3 karena dua atau lebih, tanpa anak laki-laki");
+ if(act("gdau")&&!act("gson")){if(!g("dau"))mk(["gdau"],g("gdau")==1?F(1,2):F(2,3),g("gdau")==1?"1/2 karena sendirian, tanpa anak/cucu laki-laki dan anak perempuan":"2/3 karena dua atau lebih");else mk(["gdau"],F(1,6),"1/6 penyempurna 2/3 (takmilah) bersama satu anak perempuan")}
+ if(g("mother")){let f,w;
+  if(desc){f=F(1,6);w="1/6 (nuqshan dari 1/3) karena ada furu’ waris"}
+  else if(nsib>=2){f=F(1,6);w="1/6 (nuqshan dari 1/3) karena ada dua saudara atau lebih"}
+  else if(sp&&g("father")){f=mul(sub(F(1),R[sp].fr),F(1,3));w=fs(f)+" dari total = 1/3 sisa setelah bagian "+lab(sp)+" (Umariyatain)"}
+  else{f=F(1,3);w="1/3 karena tidak ada furu’ waris dan saudara kurang dari dua"}
+  mk(["mother"],f,w)}
+ const P=g("father")?"father":act("gfather")?"gfather":null;
+ if(P&&mdesc)mk([P],F(1,6),"1/6 karena ada furu’ waris laki-laki");
+ else if(P&&fem){const x=mk([P],F(1,6),"1/6 karena ada furu’ waris perempuan, lalu menerima sisa sebagai ashabah bin nafs");x.ash=true}
+ const gm=["gmm","gmf"].filter(act);if(gm.length)mk(gm,F(1,6),"1/6 dibagi rata sesama nenek");
+ if(act("fsis")&&!act("fbro")&&!fem)mk(["fsis"],g("fsis")==1?F(1,2):F(2,3),g("fsis")==1?"1/2 karena sendirian, tanpa saudara lk kandung":"2/3 karena dua atau lebih");
+ if(act("psis")&&!act("pbro")&&!fem){const n=act("fsis")?g("fsis"):0;
+  if(n==0)mk(["psis"],g("psis")==1?F(1,2):F(2,3),g("psis")==1?"1/2 karena sendirian":"2/3 karena dua atau lebih");
+  else mk(["psis"],F(1,6),"1/6 penyempurna 2/3 (takmilah) bersama satu saudari kandung")}
+ if(act("msib"))mk(["msib"],g("msib")==1?F(1,6):F(1,3),g("msib")==1?"1/6 karena sendirian":"1/3 dibagi rata karena dua atau lebih");
+ /* ASHABAH */
+ const lv=[],ad=(ks,why)=>{const a=ks.filter(act);if(a.length)lv.push(a)};
+ ad(["son","dau"]);if(!act("son"))ad(["gson","gdau"]);
+ if(P&&!mdesc)lv.push([P]);
+ if(act("fbro"))ad(["fbro","fsis"]);else if(act("fsis")&&fem)lv.push(["fsis"]);
+ if(act("pbro"))ad(["pbro","psis"]);else if(act("psis")&&fem)lv.push(["psis"]);
+ ["fnep","pnep","func","punc","fcou","pcou"].forEach(k=>ad([k]));
+ const win=lv[0];let ashG=null;
+ if(win){if(P&&win[0]==P&&R[P])ashG=R[P];else ashG=mk(win,null,"");ashG.ash=true;
+  lv.slice(1).forEach(l=>l.forEach(k=>{M[k]="Tertutup oleh ashabah yang lebih didahulukan: "+lab(win[0])}))}
+ const asht=(k)=>MK.has(k)||k==P||!FM.has(k)?"Ashabah bin nafs":R[k].ks.some(j=>MK.has(j))?"Ashabah bil ghair":"Ashabah ma’al ghair";
+ /* ASHLUL MAS'ALAH */
+ let asl=G.filter(x=>x.fr).reduce((l,x)=>lcm(l,x.fr[1]),1);const asl0=asl;
+ G.forEach(x=>x.s=x.fr?x.fr[0]*asl/x.fr[1]:0);
+ let tot=G.reduce((s,x)=>s+x.s,0),bm=0,note="";
+ log.push("Furudh: "+G.filter(x=>x.fr).map(x=>x.ks.map(lab).join("/")+" "+x.f0).join("; ")+(ashG?"; ashabah: "+ashG.ks.map(lab).join(" + "):"; tidak ada ashabah")+".");
+ log.push("Ashlul mas’alah = KPK penyebut furudh = "+asl+".");
+ if(tot>asl){asl=tot;note="‘awl";log.push("Jumlah saham "+tot+" melebihi ashlul mas’alah "+asl0+" → ‘awl, ashlul mas’alah menjadi "+asl+".")}
+ else if(tot<asl){
+  if(ashG){ashG.s+=asl-tot;ashG.sisa=asl-tot;log.push("Sisa "+(asl-tot)+" saham diberikan kepada ashabah ("+ashG.ks.map(lab).join(" + ")+").")}
+  else{const oth=G.filter(x=>!x.sp),sps=G.filter(x=>x.sp).reduce((s,x)=>s+x.s,0);
+   if(oth.length){const ot=oth.reduce((s,x)=>s+x.s,0);
+    G.forEach(x=>x.fr=x.sp?F(x.s,asl):F((asl-sps)*x.s,asl*ot));
+    asl=G.reduce((l,x)=>lcm(l,x.fr[1]),1);G.forEach(x=>x.s=x.fr[0]*asl/x.fr[1]);note="radd";
+    warn.push("Terjadi radd (tanpa ashabah, saham kurang dari ashlul mas’alah). Pembagian radd bersifat khilafiyah antar mazhab (ada yang menyerahkan sisa ke baitul mal) dan belum terverifikasi terhadap kitab pegangan Anda.");
+    log.push("Saham "+tot+" kurang dari "+asl0+", tidak ada ashabah → radd kepada selain "+(sps?"suami/istri":"-")+"; ashlul mas’alah baru = "+asl+".")}
+   else{bm=asl-tot;warn.push("Hanya suami/istri tanpa ahli waris lain: sisa dicatat sebagai sisa (baitul mal / radd) dan belum terverifikasi.")}}}
+ if(win&&win[0]=="fbro"&&asl==tot&&!ashG.sisa&&act("msib"))warn.push("Kemungkinan masalah Musytarakah (saudara kandung bersama saudara seibu): belum didukung dan belum terverifikasi.");
+ /* TASHIH */
+ let fac=1;
+ G.forEach(x=>{x.u=x.ks.reduce((s,k)=>s+g(k)*x.w[k],0);if(x.s%x.u){const d=gcd(x.s,x.u);x.m=x.u/d;fac=lcm(fac,x.m);
+  log.push(x.ks.map(lab).join("/")+": saham "+x.s+" tidak habis dibagi "+x.u+" bagian → "+(d>1?"tawafuq (FPB "+d+")":"tabayun")+", pengali "+x.m+".")}});
+ const asl2=asl*fac;G.forEach(x=>{x.t=x.s*fac;x.unit=x.t/x.u});
+ log.push(fac>1?"Tashih al-mas’alah: "+asl+" × "+fac+" = "+asl2+".":"Tashih tidak diperlukan, semua saham habis dibagi.");
+ log.push("Nasib per orang = saham tashih ÷ jumlah bagian kelompok, dibandingkan dengan "+asl2+".");
+ G.sort((a,b)=>Math.min(...a.ks.map(k=>H.findIndex(h=>h[0]==k)))-Math.min(...b.ks.map(k=>H.findIndex(h=>h[0]==k))));
+ return{G,M,R,asl0,asl,asl2,fac,note,bm,log,warn,asht,P,win};
+}
+
+let items=[],harta=0;
+const $=id=>document.getElementById(id),rp=n=>"Rp"+Math.round(n).toLocaleString("id-ID");
+$("sel").innerHTML=H.map(h=>`<option value="${h[0]}">${h[1]} — ${h[2]}</option>`).join("");
+$("ex").innerHTML+=Object.keys(EX).map(k=>`<option>${k}</option>`).join("");
+$("add").onclick=()=>{const k=$("sel").value,mx=H.find(h=>h[0]==k)[3],n=Math.max(1,Math.min(mx,parseInt($("num").value)||1));
+ const e=items.find(i=>i.k==k);e?e.n=Math.min(mx,e.n+n):items.push({k,n});render()};
+$("reset").onclick=()=>{items=[];$("harta").value="";$("ex").value="";render()};
+$("ex").onchange=e=>{const v=EX[e.target.value];if(v){items=Object.entries(v).map(([k,n])=>({k,n}));render()}};
+$("harta").oninput=render;
+window.setN=(k,v)=>{const mx=H.find(h=>h[0]==k)[3],e=items.find(i=>i.k==k);e.n=Math.max(1,Math.min(mx,parseInt(v)||1));render(true)};
+window.del=k=>{items=items.filter(i=>i.k!=k);render()};
+
+function render(keep){
+ harta=parseFloat($("harta").value)||0;
+ if(!keep)$("list").innerHTML=items.map(i=>{const h=H.find(h=>h[0]==i.k);return`<div class="chip"><span class="ar">${h[1]}</span><span>${h[2]}</span><input type="number" min="1" max="${h[3]}" value="${i.n}" onchange="setN('${i.k}',this.value)"><button class="x" onclick="del('${i.k}')" aria-label="Hapus">✕</button></div>`}).join("");
+ const c={};items.forEach(i=>c[i.k]=i.n);const r=calc(c),o=$("out");
+ if(r.err){o.innerHTML=`<div class="msg ${items.length?"err":"warn"}">${r.err}</div>`;return}
+ const g=k=>c[k]||0;
+ let rows="",tS=0,tT=0;
+ r.G.forEach(x=>{x.ks.forEach((k,i)=>{const n=g(k),w=x.w[k],per=x.unit*w,tk=per*n;tT+=tk;
+  const bag=x.fr?(x.f0+(x.ash?" + ashabah":"")+(r.note=="radd"?" (+radd)":"")):"ashabah (sisa)";
+  rows+=`<tr><td class="l"><span class="ar">${H.find(h=>h[0]==k)[1]}</span> ${lab(k)}</td><td>${n}</td><td>${bag}</td>`+(i==0?`<td rowspan="${x.ks.length}">${x.s}</td>`:"")+`<td>${tk}</td><td>${per}/${r.asl2}${per?" = "+fs(F(per,r.asl2)):""}</td>${harta?`<td>${rp(harta*per/r.asl2)}</td>`:""}</tr>`});tS+=x.s});
+ if(r.bm){tT+=r.bm;tS+=r.bm;rows+=`<tr><td class="l">Sisa (baitul mal)</td><td>-</td><td>-</td><td>${r.bm}</td><td>${r.bm}</td><td>-</td>${harta?`<td>${rp(harta*r.bm/r.asl2)}</td>`:""}</tr>`}
+ H.forEach(h=>{if(g(h[0])&&r.M[h[0]])rows+=`<tr class="mj"><td class="l"><span class="ar">${h[1]}</span> ${h[2]}</td><td>${g(h[0])}</td><td colspan="${harta?5:4}">mahjub (terhijab)</td></tr>`});
+ const chain=[`Ashlul mas’alah ${r.asl0}`];if(r.note)chain.push(r.note=="‘awl"?`‘awl menjadi ${r.asl}`:`radd menjadi ${r.asl}`);if(r.fac>1)chain.push(`tashih ×${r.fac} = ${r.asl2}`);
+ let an="";
+ H.forEach(h=>{const k=h[0];if(!g(k))return;let st,why;
+  if(r.M[k]){st="Mahjub (hirman)";why=r.M[k]}
+  else{const x=r.R[k];
+   if(x&&x.fr){st="Ashabul furudh"+(x.ash?" + "+r.asht(k):"")+(r.note=="radd"&&!x.sp?" (+radd)":"");why=x.why}
+   else{st=r.asht(k);why=st=="Ashabah bin nafs"?"Ashabah paling didahulukan, menerima sisa":st=="Ashabah bil ghair"?"Menjadi ashabah karena ada saudara laki-lakinya, dibagi 2:1":"Menjadi ashabah karena ada anak/cucu perempuan, menerima sisa"}}
+  an+=`<tr class="${r.M[k]?"mj":""}"><td class="l"><span class="ar">${h[1]}</span> ${h[2]}</td><td>${g(k)}</td><td class="l">${st}</td><td class="l">${why}</td></tr>`});
+ o.innerHTML=(r.warn.map(w=>`<div class="msg warn">${w}</div>`).join(""))+
+ `<section><h2>2. Tabel Lembar Kerja</h2><div class="asl">${chain.join(" → ")}</div><div class="tw"><table><thead><tr><th>Ahli Waris</th><th>Jumlah</th><th>Bagian</th><th>Saham</th><th>Saham Tashih</th><th>Nasib per orang</th>${harta?"<th>Nasib (Rp, per orang)</th>":""}</tr></thead><tbody>${rows}</tbody><tfoot><tr><td colspan="3">Jumlah</td><td>${tS}</td><td>${tT}</td><td colspan="${harta?2:1}">${r.asl2}</td></tr></tfoot></table></div></section>`+
+ `<section><h2>3. Analisis Hijab dan Status</h2><div class="tw"><table><thead><tr><th>Ahli Waris</th><th>Jumlah</th><th>Status</th><th>Dasar</th></tr></thead><tbody>${an}</tbody></table></div></section>`+
+ `<section><h2>4. Langkah Perhitungan</h2><ol>${r.log.map(l=>`<li>${l}</li>`).join("")}</ol></section>`;
+}
+render();
+</script>
+</body>
+</html>
